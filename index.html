@@ -89,6 +89,12 @@
   .detail-box textarea{ min-height:80px; resize:vertical; }
   .detail-box textarea::placeholder, .detail-box input::placeholder{ color:var(--muted); }
   .detail-box input:focus, .detail-box textarea:focus{ outline:none; border-color:var(--teal); }
+  .detail-box select{
+    width:100%; border-radius:14px; padding:14px; margin-bottom:16px;
+    background:var(--glass); border:1px solid var(--glass-border); color:var(--text);
+    font-family:'Assistant',sans-serif; font-size:15px; cursor:pointer;
+  }
+  .detail-box select:focus{ outline:none; border-color:var(--teal); }
 
   .send-btn{
     font-family:'Rubik',sans-serif; font-weight:700; font-size:16px;
@@ -269,6 +275,12 @@
   <div class="detail-box" id="detailBox">
     <label>איך קוראים לך?</label>
     <input type="text" id="fname" placeholder="השם שלך">
+
+    <label for="environment">סביבת העבודה</label>
+    <select id="environment">
+      <option value="Sandbox">Sandbox — בדיקות ופיתוח</option>
+      <option value="Production">Production — אתר חי</option>
+    </select>
 
     <label>תקציב בערך (לא חובה)</label>
     <input type="text" id="budget" placeholder="למשל: עד 500 ש״ח">
@@ -838,6 +850,16 @@
   ["סטארטאפ פינטק","💳","פינטק"],
   ["ניהול פרויקטים דיגיטליים","📋","ניהול פרויקטים"],
   ["ספק שירותי ענן","☁️","שירותי ענן"],
+  ["מערכת תשלום","💳","מערכת תשלום"],
+  ["מערכת התחברות והרשמה","🔐","מערכת התחברות"],
+  ["מערכת ניהול משתמשים","👥","ניהול משתמשים"],
+  ["מערכת הזמנות","📅","מערכת הזמנות"],
+  ["מערכת מנויים","🔁","מערכת מנויים"],
+  ["מערכת ניהול תוכן (CMS)","🗂️","מערכת CMS"],
+  ["מרקטפלייס / שוק דיגיטלי","🛒","מרקטפלייס"],
+  ["לוח מודעות דיגיטלי","📌","לוח מודעות"],
+  ["אתר Roblox / משחק אונליין","🎮","Roblox / משחק אונליין"],
+  ["מערכת SaaS","☁️","מערכת SaaS"],
   ["חברת רובוטיקה תעשייתית","🤖","רובוטיקה תעשייתית"],
   ["מפתח פרילנסר","👨‍💻","מפתח פרילנסר"],
   ["חנות גאדג'טים חכמים","📱","גאדג'טים חכמים"],
@@ -894,7 +916,7 @@
     { name: 'בריאות וטיפולים', emoji: '🩺', keywords: ['מרפא','קליני','קלינ','רופא','פיזיו','דיאט','טיפול','תזונה','וטרינר','רפואה','אורתופ','כירופ','מכון יופי','עיסוי'] },
     { name: 'שירותים מקצועיים', emoji: '💼', keywords: ['יועץ','עורך דין','רואה חשבון','חשמלאי','אינסטלטור','מתקין','נוטריון','הנה״ח','תרגום','אדריכל','הנהלת חשבונות'] },
     { name: 'ספורט ופנאי', emoji: '🏃', keywords: ['ספורט','כושר','יוגה','ריקוד','שחייה','טניס','כדור','אקדמיית','מועדון','פילאטיס'] },
-    { name: 'טכנולוגיה ודיגיטל', emoji: '💻', keywords: ['אפליקציה','תוכנה','דיגיטל','SaaS','סייבר','בינה מלאכותית','בלוקצ׳יין','מחשב','אתר','גיימינג','שרת','iot','ux','פינטק','ענן','רובוטיקה','פרילנסר','גאדג','בית חכם','חדשנות','דאטה',' it','פיתוח משחקים'] },
+    { name: 'טכנולוגיה ודיגיטל', emoji: '💻', keywords: ['אפליקציה','תוכנה','דיגיטל','SaaS','סייבר','בינה מלאכותית','בלוקצ׳יין','מחשב','אתר','גיימינג','שרת','iot','ux','פינטק','ענן','רובוטיקה','פרילנסר','גאדג','בית חכם','חדשנות','דאטה',' it','פיתוח משחקים','מערכת','תשלום','התחברות','משתמשים','הזמנות','מנויים','CMS','מרקטפלייס','לוח מודעות','Roblox','אונליין'] },
     { name: 'בית ותחזוקה', emoji: '🏠', keywords: ['שיפוצ','חשמלאי','אינסטלטור','מנעולן','ניקיון','גינון','מיזוג','בנייה','איטום','בידוד','תחזוקה'] },
     { name: 'יופי וטיפוח', emoji: '💅', keywords: ['מספרה','קוסמטיקה','איפור','ציפורניים','שיזוף','פדיקור','מניקור','שיער','פאות','אסתטיקה','בוטוקס'] },
     { name: 'חינוך והדרכה', emoji: '🎓', keywords: ['קורס','הדרכה','מורה','חוג','לימוד','אקדמיה','בית ספר','גן ילדים','מעון','פעוטון'] },
@@ -1054,6 +1076,7 @@
 
   function buildMessage() {
     const fname = document.getElementById('fname').value.trim();
+    const environment = document.getElementById('environment').value;
     const budget = document.getElementById('budget').value.trim();
     const timeline = document.getElementById('timeline').value.trim();
     const colors = document.getElementById('colors').value.trim();
@@ -1072,6 +1095,7 @@
 
     let msg = `היי אוראל! אני רוצה אתר בנושא: ${selectedTopic}`;
     if (fname) msg += `\nשם: ${fname}`;
+    msg += `\nסביבת עבודה: ${environment}`;
     if (city) msg += `\nעיר/אזור: ${city}`;
     if (phone) msg += `\nטלפון לחזרה: ${phone}`;
     if (budget) msg += `\nתקציב: ${budget}`;
