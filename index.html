@@ -52,6 +52,10 @@
     font-family:'Rubik',sans-serif; font-size:14px; color:var(--amber);
     margin-bottom:14px; text-align:right;
   }
+  #selectedTopicLabel{
+    display:none; color:var(--teal); font-weight:700; margin-right:8px;
+  }
+  #selectedTopicLabel.visible{ display:inline; }
   .options{
     display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
     gap:12px; margin-bottom:40px;
@@ -171,7 +175,7 @@
   <h1>איזה אתר בא לך?</h1>
   <p class="sub">תבחרו נושא, תוסיפו כמה מילים אם בא לכם, ואני אקבל את זה ישר בוואטסאפ.</p>
 
-  <div class="step-label">1. בחרו נושא <span id="topicCount"></span></div>
+  <div class="step-label">1. בחרו נושא <span id="topicCount"></span><span id="selectedTopicLabel" aria-live="polite"></span></div>
   <div class="category-row" id="categoryRow"></div>
   <div class="search-wrap">
     <span class="search-icon">🔍</span>
@@ -897,10 +901,16 @@
   function selectTopic(div, topic) {
     document.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
     div.classList.add('selected');
+    document.querySelectorAll('.option').forEach(o => o.setAttribute('aria-pressed', 'false'));
+    div.setAttribute('aria-pressed', 'true');
     selectedTopic = topic;
+    const selectedLabel = document.getElementById('selectedTopicLabel');
+    selectedLabel.textContent = `✓ נבחר: ${topic}`;
+    selectedLabel.classList.add('visible');
     detailBox.classList.add('open');
     sendBtn.classList.add('active');
     emailBtn.classList.add('active');
+    window.setTimeout(() => detailBox.scrollIntoView({ behavior: 'smooth', block: 'start' }), 120);
   }
 
   function loadNextBatch() {
