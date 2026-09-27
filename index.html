@@ -75,7 +75,7 @@
     text-align:right; margin-bottom:30px; opacity:0; max-height:0; overflow:hidden;
     transition:opacity .3s ease, max-height .3s ease;
   }
-  .detail-box.open{ opacity:1; max-height:1900px; }
+  .detail-box.open{ opacity:1; max-height:5000px; }
   .detail-box label{ display:block; font-size:13px; color:var(--muted); margin-bottom:8px; }
   .detail-box textarea, .detail-box input{
     width:100%; border-radius:14px; padding:14px; margin-bottom:16px;
@@ -797,7 +797,7 @@
   const detailBox = document.getElementById('detailBox');
   const sendBtn = document.getElementById('sendBtn');
   const emailBtn = document.getElementById('emailBtn');
-  const EMAIL = "example@email.com"; // TODO: להחליף למייל האמיתי
+  const EMAIL = ""; // יש למלא כתובת מייל אמיתית לפני הפעלת כפתור המייל
   const searchInput = document.getElementById('topicSearch');
   const ALL_TOPICS = [...TOPICS, EXTRA_TOPIC];
 
@@ -851,7 +851,7 @@
     }
 
     loadMoreBtn.classList.add('hidden');
-    const matches = TOPICS.filter(([topic, , label]) => {
+    const matches = ALL_TOPICS.filter(([topic, , label]) => {
       const combined = (topic + ' ' + label).toLowerCase();
       return cat.keywords.some(k => combined.includes(k.toLowerCase()));
     });
@@ -874,8 +874,23 @@
     const div = document.createElement('div');
     div.className = 'option';
     div.dataset.topic = topic;
-    div.innerHTML = `<span class="emoji">${emoji}</span><span class="label">${label}</span>`;
-    div.addEventListener('click', () => selectTopic(div, topic));
+    div.setAttribute('role', 'button');
+    div.setAttribute('tabindex', '0');
+    const emojiEl = document.createElement('span');
+    emojiEl.className = 'emoji';
+    emojiEl.textContent = emoji;
+    const labelEl = document.createElement('span');
+    labelEl.className = 'label';
+    labelEl.textContent = label;
+    div.append(emojiEl, labelEl);
+    const choose = () => selectTopic(div, topic);
+    div.addEventListener('click', choose);
+    div.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        choose();
+      }
+    });
     return div;
   }
 
@@ -990,11 +1005,14 @@
     if (!selectedTopic) return;
     const msg = buildMessage();
     const url = `https://wa.me/${PHONE}?text=${encodeURIComponent(msg)}`;
-    window.open(url, '_blank');
+    window.open(url, '_blank', 'noopener,noreferrer');
   });
 
   emailBtn.addEventListener('click', () => {
-    if (!selectedTopic) return;
+    if (!selectedTopic || !EMAIL) {
+      alert('שליחת מייל תופעל לאחר הוספת כתובת מייל אמיתית. אפשר לשלוח בינתיים בוואטסאפ.');
+      return;
+    }
     const msg = buildMessage();
     const subject = encodeURIComponent(`בקשה לאתר: ${selectedTopic}`);
     const body = encodeURIComponent(msg);
