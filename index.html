@@ -81,6 +81,13 @@
   .subscription-features li{ display:flex; gap:10px; align-items:flex-start; line-height:1.5; }
   .subscription-features li::before{ content:'✓'; color:var(--teal); font-family:'Rubik',sans-serif; font-weight:900; }
   .subscription-note{ margin-top:20px; padding-top:16px; border-top:1px solid var(--glass-border); color:var(--muted); font-size:13px; }
+  .buy-subscription-btn{
+    width:100%; margin-top:20px; padding:15px 20px; border:0; border-radius:14px; cursor:pointer;
+    background:linear-gradient(120deg,#ffc439,#ff9f1c); color:#241500;
+    font-family:'Rubik',sans-serif; font-size:16px; font-weight:700;
+    box-shadow:0 10px 24px rgba(255,180,40,.2); transition:transform .25s ease,box-shadow .25s ease;
+  }
+  .buy-subscription-btn:hover{ transform:translateY(-3px); box-shadow:0 14px 28px rgba(255,180,40,.3); }
   .sub{ color:var(--muted); font-weight:300; font-size:16px; margin-bottom:40px; }
 
   .step-label{
@@ -316,6 +323,7 @@
         <li>בניית מערכת תשלום באתר</li>
       </ul>
       <p class="subscription-note">לפרטים והתאמה אישית של המנוי, השאירו הודעה ונחזור אליכם.</p>
+      <button class="buy-subscription-btn" id="buySubscriptionBtn" type="button">קנייה ב־PayPal / כרטיס אשראי</button>
     </article>
   </section>
 
@@ -970,6 +978,7 @@
   const createdSitesPanel = document.getElementById('createdSitesPanel');
   const subscriptionsTab = document.getElementById('subscriptionsTab');
   const subscriptionsPanel = document.getElementById('subscriptionsPanel');
+  const buySubscriptionBtn = document.getElementById('buySubscriptionBtn');
   const homeOnly = document.querySelectorAll('.home-only');
 
   function activateTab(tabName) {
@@ -990,6 +999,9 @@
   homeTab.addEventListener('click', () => activateTab('home'));
   createdSitesTab.addEventListener('click', () => activateTab('created'));
   subscriptionsTab.addEventListener('click', () => activateTab('subscriptions'));
+  buySubscriptionBtn.addEventListener('click', () => {
+    alert('כפתור הקנייה מוכן. כדי להפעיל תשלום אמיתי ב־PayPal או בכרטיס אשראי, צריך לחבר חשבון PayPal ומחיר למנוי.');
+  });
   const ALL_TOPICS = [...TOPICS, EXTRA_TOPIC];
 
   document.getElementById('topicCount').textContent = `(יש ${TOPICS.length + 1} נושאים)`;
