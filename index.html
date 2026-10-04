@@ -52,6 +52,19 @@
     border:1px solid var(--teal); color:var(--teal);
     font-family:'Rubik',sans-serif; font-size:18px; font-weight:700;
   }
+  .site-nav{
+    display:flex; gap:10px; justify-content:center; margin:0 auto 30px;
+    padding:6px; max-width:420px; background:var(--glass);
+    border:1px solid var(--glass-border); border-radius:18px; backdrop-filter:blur(14px);
+  }
+  .site-tab{
+    flex:1; border:0; border-radius:13px; padding:12px 16px; cursor:pointer;
+    background:transparent; color:var(--muted); font-family:'Rubik',sans-serif;
+    font-size:14px; font-weight:700; transition:all .25s ease;
+  }
+  .site-tab:hover{ color:var(--text); }
+  .site-tab.active{ background:linear-gradient(120deg,var(--teal),var(--violet)); color:#08111a; }
+  .tab-hidden{ display:none !important; }
   .sub{ color:var(--muted); font-weight:300; font-size:16px; margin-bottom:40px; }
 
   .step-label{
@@ -229,11 +242,14 @@
 
 <main>
   <div class="eyebrow">בונים אתר יחד</div>
-  <h1>איזה אתר בא לך?</h1>
-  <div class="price-banner">בניית אתר ב־30 ש״ח בלבד</div>
-  <p class="sub">תבחרו נושא, תוסיפו כמה מילים אם בא לכם, ואני אקבל את זה ישר בוואטסאפ.</p>
-
-  <section class="created-sites" aria-labelledby="created-sites-title">
+  <nav class="site-nav" aria-label="ניווט ראשי">
+    <button class="site-tab active" id="homeTab" type="button" aria-selected="true">בית</button>
+    <button class="site-tab" id="createdSitesTab" type="button" aria-selected="false">האתרים שיצרנו</button>
+  </nav>
+  <h1 class="home-only">איזה אתר בא לך?</h1>
+  <div class="price-banner home-only">בניית אתר ב־30 ש״ח בלבד</div>
+  <p class="sub home-only">תבחרו נושא, תוסיפו כמה מילים אם בא לכם, ואני אקבל את זה ישר בוואטסאפ.</p>
+  <section class="created-sites tab-hidden" id="createdSitesPanel" aria-labelledby="created-sites-title">
     <div class="created-sites-heading">
       <div>
         <h2 id="created-sites-title">האתרים שנוצרו כאן</h2>
@@ -269,6 +285,7 @@
     </div>
   </section>
 
+  <section class="home-only" id="homeForm">
   <div class="step-label">1. בחרו נושא <span id="topicCount"></span><span id="selectedTopicLabel" aria-live="polite"></span></div>
   <div class="category-row" id="categoryRow"></div>
   <div class="search-wrap">
@@ -342,6 +359,7 @@
     <button class="send-btn email-btn" id="emailBtn">שליחה במייל</button>
   </div>
   <p class="hint">זה יפתח וואטסאפ או מייל עם הודעה מוכנה אליי, אתם רק לוחצים שליחה.</p>
+  </section>
 </main>
 
 <script>
@@ -913,6 +931,24 @@
   const emailBtn = document.getElementById('emailBtn');
   const EMAIL = ""; // יש למלא כתובת מייל אמיתית לפני הפעלת כפתור המייל
   const searchInput = document.getElementById('topicSearch');
+  const homeTab = document.getElementById('homeTab');
+  const createdSitesTab = document.getElementById('createdSitesTab');
+  const createdSitesPanel = document.getElementById('createdSitesPanel');
+  const homeOnly = document.querySelectorAll('.home-only');
+
+  function activateTab(tabName) {
+    const showingCreatedSites = tabName === 'created';
+    homeOnly.forEach(element => element.classList.toggle('tab-hidden', showingCreatedSites));
+    createdSitesPanel.classList.toggle('tab-hidden', !showingCreatedSites);
+    homeTab.classList.toggle('active', !showingCreatedSites);
+    createdSitesTab.classList.toggle('active', showingCreatedSites);
+    homeTab.setAttribute('aria-selected', String(!showingCreatedSites));
+    createdSitesTab.setAttribute('aria-selected', String(showingCreatedSites));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  homeTab.addEventListener('click', () => activateTab('home'));
+  createdSitesTab.addEventListener('click', () => activateTab('created'));
   const ALL_TOPICS = [...TOPICS, EXTRA_TOPIC];
 
   document.getElementById('topicCount').textContent = `(יש ${TOPICS.length + 1} נושאים)`;
