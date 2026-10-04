@@ -88,6 +88,9 @@
     box-shadow:0 10px 24px rgba(255,180,40,.2); transition:transform .25s ease,box-shadow .25s ease;
   }
   .buy-subscription-btn:hover{ transform:translateY(-3px); box-shadow:0 14px 28px rgba(255,180,40,.3); }
+  .paypal-checkout-wrap{ margin-top:20px; }
+  .paypal-status{ min-height:20px; margin-top:10px; color:var(--muted); font-size:13px; text-align:center; }
+  .paypal-status.error{ color:#fca5a5; }
   .sub{ color:var(--muted); font-weight:300; font-size:16px; margin-bottom:40px; }
 
   .step-label{
@@ -323,7 +326,10 @@
         <li>בניית מערכת תשלום באתר</li>
       </ul>
       <p class="subscription-note">לפרטים והתאמה אישית של המנוי, השאירו הודעה ונחזור אליכם.</p>
-      <button class="buy-subscription-btn" id="buySubscriptionBtn" type="button">קנייה ב־PayPal / כרטיס אשראי</button>
+      <div class="paypal-checkout-wrap">
+        <div id="paypal-button-container"></div>
+        <p class="paypal-status" id="paypalStatus" role="status">טוען אפשרויות תשלום מאובטחות...</p>
+      </div>
     </article>
   </section>
 
@@ -978,7 +984,8 @@
   const createdSitesPanel = document.getElementById('createdSitesPanel');
   const subscriptionsTab = document.getElementById('subscriptionsTab');
   const subscriptionsPanel = document.getElementById('subscriptionsPanel');
-  const buySubscriptionBtn = document.getElementById('buySubscriptionBtn');
+  const paypalButtonContainer = document.getElementById('paypal-button-container');
+  const paypalStatus = document.getElementById('paypalStatus');
   const homeOnly = document.querySelectorAll('.home-only');
 
   function activateTab(tabName) {
@@ -999,9 +1006,45 @@
   homeTab.addEventListener('click', () => activateTab('home'));
   createdSitesTab.addEventListener('click', () => activateTab('created'));
   subscriptionsTab.addEventListener('click', () => activateTab('subscriptions'));
-  buySubscriptionBtn.addEventListener('click', () => {
-    alert('כפתור הקנייה מוכן. כדי להפעיל תשלום אמיתי ב־PayPal או בכרטיס אשראי, צריך לחבר חשבון PayPal ומחיר למנוי.');
-  });
+
+  function setPayPalStatus(message, isError = false) {
+    paypalStatus.textContent = message;
+    paypalStatus.classList.toggle('error', isError);
+  }
+
+  function initPayPalButtons() {
+    if (!window.paypal || !paypalButtonContainer) {
+      setPayPalStatus('אפשרויות התשלום לא נטענו. נסו לרענן את העמוד.', true);
+      return;
+    }
+    window.paypal.Buttons({
+      style: { layout: 'vertical', shape: 'rect', label: 'paypal', height: 48 },
+      createOrder: async () => {
+        setPayPalStatus('יוצרים הזמנה מאובטחת...');
+        const response = await fetch('/api/paypal/create-order', { method: 'POST' });
+        const data = await response.json();
+        if (!response.ok || !data.id) throw new Error(data.error || 'יצירת ההזמנה נכשלה');
+        return data.id;
+      },
+      onApprove: async (data) => {
+        setPayPalStatus('מאשרים את התשלום...');
+        const response = await fetch('/api/paypal/capture-order', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ orderID: data.orderID })
+        });
+        const result = await response.json();
+        if (!response.ok || result.status !== 'COMPLETED') throw new Error(result.error || 'אישור התשלום נכשל');
+        setPayPalStatus('התשלום התקבל בהצלחה. תודה רבה!');
+      },
+      onCancel: () => setPayPalStatus('התשלום בוטל. אפשר לנסות שוב בכל עת.'),
+      onError: () => setPayPalStatus('אירעה שגיאה בתשלום. נסו שוב או פנו אלינו.', true)
+    }).render('#paypal-button-container').then(() => {
+      setPayPalStatus('');
+    }).catch(() => {
+      setPayPalStatus('אפשרויות התשלום לא נטענו. נסו לרענן את העמוד.', true);
+    });
+  }
   const ALL_TOPICS = [...TOPICS, EXTRA_TOPIC];
 
   document.getElementById('topicCount').textContent = `(יש ${TOPICS.length + 1} נושאים)`;
@@ -1230,6 +1273,6 @@
     window.location.href = `mailto:${EMAIL}?subject=${subject}&body=${body}`;
   });
 </script>
-
+<script src="https://www.paypal.com/sdk/js?client-id=BAAlP79xen63J3G1iPz9E8f8O4PLZREQf7SLbTdGv0Och_KkK87-tYF7E4tbmypDEL48fGt_WmOKbj0K0c&currency=ILS&intent=capture&components=buttons&enable-funding=card" onload="initPayPalButtons()" async></script>
 </body>
 </html>
